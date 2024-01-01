@@ -1,0 +1,1 @@
+/usr/bin/cc  -fsanitize=address  -fsanitize=address CMakeFiles/main.dir/main.c.o CMakeFiles/main.dir/blocks.c.o CMakeFiles/main.dir/collisions.c.o CMakeFiles/main.dir/render.c.o -o main  -lSDL2 -lSDL2_image -lSDL2_ttf 

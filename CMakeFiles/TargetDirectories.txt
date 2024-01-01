@@ -1,0 +1,3 @@
+/home/tom/Desktop/projekt/CMakeFiles/main.dir
+/home/tom/Desktop/projekt/CMakeFiles/edit_cache.dir
+/home/tom/Desktop/projekt/CMakeFiles/rebuild_cache.dir
