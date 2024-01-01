@@ -30,7 +30,7 @@ int checkRightCollision(SHAPE activeShape, int playWidth) {
 }
 
 
-int checkCollision(SHAPE activeShape, int gameBoard[BOARD_HEIGHT][BOARD_WIDTH]) {
+int checkCollision(SHAPE activeShape, int (*gameBoard)[BOARD_WIDTH]) {
     for (int i = 0; i < activeShape.size; i++) {
         for (int j = 0; j < activeShape.size; j++) {
             if (activeShape.matrix[i][j] &&
@@ -42,22 +42,23 @@ int checkCollision(SHAPE activeShape, int gameBoard[BOARD_HEIGHT][BOARD_WIDTH]) 
     return 0;
 }
 
-void updateGameBoard(SHAPE activeShape, int gameBoard[BOARD_HEIGHT][BOARD_WIDTH]) {
+void updateGameBoard(SHAPE activeShape, int (*gameBoard)[BOARD_WIDTH]) {
     for (int i = 0; i < activeShape.size; i++) {
         for (int j = 0; j < activeShape.size; j++) {
             int boardX = activeShape.x + i;
             int boardY = activeShape.y + j;
 
             if (boardX >= 0 && boardY >= 0 && boardX < BOARD_WIDTH && boardY < BOARD_HEIGHT) {
-                gameBoard[boardY][boardX] = 1;
+                if (activeShape.matrix[i][j]) {
+                    gameBoard[boardY][boardX] = 1;
+                }
             }
         }
     }
 }
 
 
-
-void clearLines(int gameBoard[BOARD_HEIGHT][BOARD_WIDTH]) {
+void clearLines(int (*gameBoard)[BOARD_WIDTH]) {
     for (int i = BOARD_HEIGHT - 1; i >= 0; i--) {
         int isLineFull = 1;
         for (int j = 0; j < BOARD_WIDTH; j++) {

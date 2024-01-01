@@ -3,15 +3,16 @@
 #include <SDL2/SDL_ttf.h>
 
 
-void draw(SHAPE activeShape,SHAPE nextShape, SDL_Renderer *renderer, int gameBoard[BOARD_HEIGHT][BOARD_WIDTH],TTF_Font *font) {
+void draw(SHAPE activeShape, SHAPE nextShape, SDL_Renderer *renderer, int (*gameBoard)[BOARD_WIDTH], TTF_Font *font)
+ {
     SDL_Rect rect;
     rect.w = rect.h = TILE_SIZE;
 
     for (int i = 0; i < BOARD_WIDTH; i++) {
         for (int j = 0; j < BOARD_HEIGHT; j++) {
-            if (gameBoard[i][j]) {
-                rect.x = i * TILE_SIZE;
-                rect.y = j * TILE_SIZE;
+            if (gameBoard[j * BOARD_WIDTH + i]) {  // Adjusted indexing for 1D array
+                rect.x = TILE_SIZE * i;
+                rect.y = TILE_SIZE * j;
                 SDL_SetRenderDrawColor(renderer, 100, 100, 100, 255);
                 SDL_RenderFillRect(renderer, &rect);
                 SDL_SetRenderDrawColor(renderer, 219, 219, 219, 255);
@@ -105,7 +106,7 @@ void renderText(SDL_Renderer *renderer, TTF_Font *font, const char *text, int x,
     SDL_DestroyTexture(texture);
 }
 
-void render(SDL_Renderer *renderer, SDL_Window *window, SHAPE activeShape,SHAPE nextShape, int gameBoard[BOARD_HEIGHT][BOARD_WIDTH], GameState gameState, int selectedMenuItem,TTF_Font *font) {
+void render(SDL_Renderer *renderer, SDL_Window *window, SHAPE activeShape,SHAPE nextShape, int (*gameBoard)[BOARD_WIDTH], GameState gameState, int selectedMenuItem,TTF_Font *font) {
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
 

@@ -12,6 +12,7 @@
 #define BOARD_WIDTH 10
 #define BOARD_HEIGHT 20
 #define NUM_MENU_ITEMS 3
+#define BOARD_SIZE (BOARD_HEIGHT * BOARD_WIDTH)
 
 typedef struct
 {
@@ -25,6 +26,12 @@ typedef enum
     QUIT
 } MenuOption;
 
+typedef struct {
+    int width;
+    int height;
+    int *data;
+} GameBoard;
+
 int selectedMenuItem = 0;
 SHAPE activeShape;
 SHAPE nextShape;
@@ -33,9 +40,30 @@ SDL_Window *window;
 GameState gameState = MENU;
 int timerFPS, lastFrame, fps;
 int left, right, up, down, active;
-int gameBoard[BOARD_HEIGHT][BOARD_WIDTH];
+GameBoard gameBoard;
 TTF_Font *font;
 GameSettings gameSettings;
+
+
+GameBoard createGameBoard(int width, int height) {
+    GameBoard board;
+    board.width = width;
+    board.height = height;
+    board.data = malloc(sizeof(int) * width * height);
+    return board;
+}
+
+void freeGameBoard(GameBoard *board) {
+    free(board->data);
+}
+
+int getCell(GameBoard *board, int x, int y) {
+    return board->data[y * board->width + x];
+}
+
+void setCell(GameBoard *board, int x, int y, int value) {
+    board->data[y * board->width + x] = value;
+}
 
 SHAPE generateNewShape()
 {
@@ -50,14 +78,13 @@ void rotate() {
     activeShape.size = newSize;
     transpose(activeShape.matrix, activeShape.size);
 
-    // Check for collisions after rotation
     if (checkLeftCollision(activeShape)) {
         activeShape.x++;
     } else if (checkRightCollision(activeShape, BOARD_WIDTH)) {
         activeShape.x--;
     }
 
-    if (checkCollision(activeShape, gameBoard)) {
+    if (checkCollision(activeShape, &gameBoard)) {
         activeShape = originalShape; 
     }
 }
@@ -65,12 +92,12 @@ void rotate() {
 void lockShape()
 {
     srand(time(NULL));
-    updateGameBoard(activeShape, gameBoard);
+    updateGameBoard(activeShape, &gameBoard);
     activeShape = nextShape;
     nextShape = generateNewShape();
     nextShape.x = rand() % (10 - nextShape.size);
     activeShape.y = 0;
-    if (checkCollision(activeShape, gameBoard))
+    if (checkCollision(activeShape, &gameBoard))
     {
         exit(0);
     }
@@ -80,7 +107,7 @@ void update(int frameCount)
 {
     if (frameCount % 20 == 0)
     {
-        if (!checkCollision(activeShape, gameBoard))
+        if (!checkCollision(activeShape, &gameBoard))
         {
             activeShape.y++;
         }
@@ -100,7 +127,7 @@ void update(int frameCount)
     }
     if (down)
     {
-        if (!checkCollision(activeShape, gameBoard))
+        if (!checkCollision(activeShape, &gameBoard))
         {
             if (activeShape.y + activeShape.size < TILE_SIZE * BOARD_HEIGHT)
             {
@@ -226,11 +253,18 @@ int main()
     gameSettings.gameSpeed = 150;
     SDL_Rect rect;
     rect.w = rect.h = TILE_SIZE;
+    gameBoard = createGameBoard(BOARD_WIDTH, BOARD_HEIGHT); 
 
     left = right = up = down = 0;
     int frameCount = 0;
     lastFrame = 0;
     fps = 0;
+
+    for (int i = 0; i < BOARD_HEIGHT; i++) {
+        for (int j = 0; j < BOARD_WIDTH; j++) {
+            setCell(&gameBoard,i,j,0);
+        }
+    }
 
     if (TTF_Init() == -1)
     {
@@ -273,10 +307,12 @@ int main()
             frameCount++;
             update(frameCount);
             input();
-            render(renderer, window, activeShape,nextShape, gameBoard, gameState, selectedMenuItem, font);
+            render(renderer, window, activeShape,nextShape, &gameBoard, gameState, selectedMenuItem, font);
         }
     }
 
+
+    freeGameBoard(&gameBoard);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     TTF_CloseFont(font);
