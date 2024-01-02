@@ -14,23 +14,12 @@
 #define NUM_MENU_ITEMS 3
 #define BOARD_SIZE (BOARD_HEIGHT * BOARD_WIDTH)
 
-typedef struct
-{
-    int gameSpeed;
-} GameSettings;
-
 typedef enum
 {
     PLAY,
     SETTINGS_MENU,
     QUIT
 } MenuOption;
-
-typedef struct {
-    int width;
-    int height;
-    int *data;
-} GameBoard;
 
 int selectedMenuItem = 0;
 SHAPE activeShape;
@@ -55,14 +44,6 @@ GameBoard createGameBoard(int width, int height) {
 
 void freeGameBoard(GameBoard *board) {
     free(board->data);
-}
-
-int getCell(GameBoard *board, int x, int y) {
-    return board->data[y * board->width + x];
-}
-
-void setCell(GameBoard *board, int x, int y, int value) {
-    board->data[y * board->width + x] = value;
 }
 
 SHAPE generateNewShape()
@@ -93,6 +74,7 @@ void lockShape()
 {
     srand(time(NULL));
     updateGameBoard(activeShape, &gameBoard);
+    clearLines(&gameBoard, &gameSettings);
     activeShape = nextShape;
     nextShape = generateNewShape();
     nextShape.x = rand() % (10 - nextShape.size);
@@ -251,6 +233,7 @@ int main()
     nextShape = activeShape = generateNewShape();
     nextShape.x = rand() % (10 - nextShape.size);
     gameSettings.gameSpeed = 150;
+    gameSettings.score = 0;
     SDL_Rect rect;
     rect.w = rect.h = TILE_SIZE;
     gameBoard = createGameBoard(BOARD_WIDTH, BOARD_HEIGHT); 
@@ -260,8 +243,8 @@ int main()
     lastFrame = 0;
     fps = 0;
 
-    for (int i = 0; i < BOARD_HEIGHT; i++) {
-        for (int j = 0; j < BOARD_WIDTH; j++) {
+    for (int i = 0; i < BOARD_WIDTH; i++) {
+        for (int j = 0; j < BOARD_HEIGHT; j++) {
             setCell(&gameBoard,i,j,0);
         }
     }
@@ -307,7 +290,7 @@ int main()
             frameCount++;
             update(frameCount);
             input();
-            render(renderer, window, activeShape,nextShape, &gameBoard, gameState, selectedMenuItem, font);
+            render(renderer, window, activeShape,nextShape, &gameBoard, gameState, selectedMenuItem, font,gameSettings);
         }
     }
 

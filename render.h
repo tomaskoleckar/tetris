@@ -7,6 +7,7 @@
 
 #include "blocks.h"
 #include "SDL2/SDL_ttf.h"
+#include "collisions.h"
 
 typedef enum {
     MENU,
@@ -15,10 +16,24 @@ typedef enum {
     QUIT_GAME
 } GameState;
 
+typedef struct {
+    int width;
+    int height;
+    int *data;
+} GameBoard;
+
+typedef struct
+{
+    int gameSpeed;
+    int score;
+} GameSettings;
+
 void renderGrid(SDL_Renderer *renderer);
 void renderMenu(SDL_Renderer *renderer, TTF_Font *font, int selectedMenuItem);
 void renderText(SDL_Renderer *renderer, TTF_Font *font, const char *text, int x, int y);
-void render(SDL_Renderer *renderer, SDL_Window *window, SHAPE activeShape,SHAPE nextShape, int (*gameBoard)[BOARD_WIDTH], GameState gameState, int selectedMenuItem,TTF_Font *font);
-void draw(SHAPE activeShape, SHAPE nextShape, SDL_Renderer *renderer, int (*gameBoard)[BOARD_WIDTH], TTF_Font *font);
+void render(SDL_Renderer *renderer, SDL_Window *window, SHAPE activeShape,SHAPE nextShape, GameBoard *gameBoard, GameState gameState, int selectedMenuItem,TTF_Font *font,GameSettings gameSettings);
+void draw(SHAPE activeShape, SHAPE nextShape, SDL_Renderer *renderer, GameBoard* gameBoard, TTF_Font *font,GameSettings gameSettings);
+int getCell(GameBoard *board, int x, int y);
+void setCell(GameBoard *board, int x, int y, int value);
 
 #endif

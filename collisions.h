@@ -5,12 +5,13 @@
 #define BOARD_HEIGHT 20
 
 #include "blocks.h"
+#include "render.h"
 
 int checkLeftCollision(SHAPE activeShape);
 int checkRightCollision(SHAPE activeShape, int playWidth);
 int checkDownCollision(SHAPE activeShape, int playWidth);
-int checkCollision(SHAPE activeShape,int (*gameBoard)[BOARD_WIDTH]);
-void updateGameBoard(SHAPE activeShape,int (*gameBoard)[BOARD_WIDTH]);
-void clearLines(int (*gameBoard)[BOARD_WIDTH]);
+int checkCollision(SHAPE activeShape,GameBoard *gameBoard);
+void updateGameBoard(SHAPE activeShape,GameBoard *gameBoard);
+void clearLines(GameBoard *gameBoard, GameSettings *gameSettings);
 
 #endif

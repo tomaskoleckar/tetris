@@ -178,5 +178,6 @@ CMakeFiles/main.dir/main.c.o: /home/tom/Desktop/projekt/main.c \
  /usr/include/x86_64-linux-gnu/bits/types/struct_tm.h \
  /usr/include/x86_64-linux-gnu/bits/types/struct_itimerspec.h \
  /home/tom/Desktop/projekt/blocks.h \
- /home/tom/Desktop/projekt/collisions.h /usr/include/SDL2/SDL_ttf.h \
- /usr/include/SDL2/SDL.h /home/tom/Desktop/projekt/render.h
+ /home/tom/Desktop/projekt/collisions.h \
+ /home/tom/Desktop/projekt/render.h /usr/include/SDL2/SDL_ttf.h \
+ /usr/include/SDL2/SDL.h

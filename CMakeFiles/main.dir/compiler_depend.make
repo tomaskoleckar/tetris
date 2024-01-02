@@ -425,7 +425,11 @@ CMakeFiles/main.dir/collisions.c.o: collisions.c \
   /usr/include/SDL2/SDL_timer.h \
   /usr/include/SDL2/SDL_version.h \
   /usr/include/SDL2/SDL_locale.h \
-  /usr/include/SDL2/SDL_misc.h
+  /usr/include/SDL2/SDL_misc.h \
+  render.h \
+  /usr/include/SDL2/SDL_ttf.h \
+  /usr/include/SDL2/SDL.h \
+  collisions.h
 
 CMakeFiles/main.dir/main.c.o: main.c \
   /usr/include/stdc-predef.h \
@@ -644,9 +648,9 @@ CMakeFiles/main.dir/main.c.o: main.c \
   /usr/include/x86_64-linux-gnu/bits/types/struct_itimerspec.h \
   blocks.h \
   collisions.h \
+  render.h \
   /usr/include/SDL2/SDL_ttf.h \
-  /usr/include/SDL2/SDL.h \
-  render.h
+  /usr/include/SDL2/SDL.h
 
 CMakeFiles/main.dir/render.c.o: render.c \
   /usr/include/stdc-predef.h \
@@ -867,11 +871,11 @@ CMakeFiles/main.dir/render.c.o: render.c \
 
 render.c:
 
-/usr/include/SDL2/SDL_ttf.h:
-
 /usr/include/x86_64-linux-gnu/bits/types/struct_tm.h:
 
 /usr/include/time.h:
+
+/usr/include/SDL2/SDL_ttf.h:
 
 /usr/include/SDL2/SDL_misc.h:
 
