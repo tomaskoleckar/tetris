@@ -175,4 +175,5 @@ CMakeFiles/main.dir/render.c.o: /home/tom/Desktop/projekt/render.c \
  /usr/include/SDL2/SDL_shape.h /usr/include/SDL2/SDL_system.h \
  /usr/include/SDL2/SDL_timer.h /usr/include/SDL2/SDL_version.h \
  /usr/include/SDL2/SDL_locale.h /usr/include/SDL2/SDL_misc.h \
- /usr/include/SDL2/SDL_ttf.h /usr/include/SDL2/SDL.h
+ /usr/include/SDL2/SDL_ttf.h /usr/include/SDL2/SDL.h \
+ /home/tom/Desktop/projekt/collisions.h

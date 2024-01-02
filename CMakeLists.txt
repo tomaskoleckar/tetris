@@ -7,7 +7,7 @@ find_package(SDL2 REQUIRED)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=address")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=address")
 
-add_executable(main main.c blocks.c collisions.c render.c)
+add_executable(main main.c blocks.c collisions.c render.c input.c)
 
 target_include_directories(main PRIVATE ${CMAKE_SOURCE_DIR})
 

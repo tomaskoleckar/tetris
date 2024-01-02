@@ -10,6 +10,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/home/tom/Desktop/projekt/blocks.c" "CMakeFiles/main.dir/blocks.c.o" "gcc" "CMakeFiles/main.dir/blocks.c.o.d"
   "/home/tom/Desktop/projekt/collisions.c" "CMakeFiles/main.dir/collisions.c.o" "gcc" "CMakeFiles/main.dir/collisions.c.o.d"
+  "/home/tom/Desktop/projekt/input.c" "CMakeFiles/main.dir/input.c.o" "gcc" "CMakeFiles/main.dir/input.c.o.d"
   "/home/tom/Desktop/projekt/main.c" "CMakeFiles/main.dir/main.c.o" "gcc" "CMakeFiles/main.dir/main.c.o.d"
   "/home/tom/Desktop/projekt/render.c" "CMakeFiles/main.dir/render.c.o" "gcc" "CMakeFiles/main.dir/render.c.o.d"
   )

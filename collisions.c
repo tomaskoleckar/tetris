@@ -2,11 +2,13 @@
 #include "render.h"
 #include "collisions.h"
 
-int checkLeftCollision(SHAPE activeShape) {
+int checkLeftCollision(SHAPE activeShape, GameBoard *gameBoard) {
     for (int i = 0; i < activeShape.size; i++) {
         for (int j = 0; j < activeShape.size; j++) {
             if (activeShape.matrix[i][j]) {
-                if (activeShape.x + i <= 0) {
+                int boardX = activeShape.x + i - 1;
+                int boardY = activeShape.y + j;
+                if (boardX < 0 || getCell(gameBoard, boardX, BOARD_HEIGHT - boardY - 1)) {
                     return 1;
                 }
             }
@@ -15,11 +17,13 @@ int checkLeftCollision(SHAPE activeShape) {
     return 0;
 }
 
-int checkRightCollision(SHAPE activeShape, int playWidth) {
+int checkRightCollision(SHAPE activeShape, int playWidth, GameBoard *gameBoard) {
     for (int i = 0; i < activeShape.size; i++) {
         for (int j = 0; j < activeShape.size; j++) {
             if (activeShape.matrix[i][j]) {
-                if (activeShape.x + i >= playWidth - 1) {
+                int boardX = activeShape.x + i + 1;
+                int boardY = activeShape.y + j;
+                if (boardX >= playWidth || getCell(gameBoard, boardX, BOARD_HEIGHT - boardY - 1)) {
                     return 1;
                 }
             }
@@ -35,14 +39,12 @@ int checkCollision(SHAPE activeShape, GameBoard *gameBoard) {
                 int boardX = activeShape.x + i;
                 int boardY = activeShape.y + j;
 
-                // Check collision with the occupied cells in the game board
-                /*if (getCell(gameBoard, boardX, boardY)) {
+                if (getCell(gameBoard, boardX, BOARD_HEIGHT - boardY - 1)) {
                     return 1;
-                }*/
+                }
 
-                // Check collision with the bottom of the screen
                 if (boardY >= gameBoard->height - 1) {
-                    return 1;
+                    return 2;
                 }
             }
         }
@@ -57,7 +59,6 @@ void updateGameBoard(SHAPE activeShape, GameBoard *gameBoard) {
             int boardY = activeShape.y + j;
 
             if (boardX >= 0 && boardY >= 0 && boardX < gameBoard->width && boardY < gameBoard->height) {
-                // Calculate the correct Y position from bottom to top
                 int invertedY = BOARD_HEIGHT - boardY - 1;
 
                 if (activeShape.matrix[i][j]) {
@@ -68,8 +69,7 @@ void updateGameBoard(SHAPE activeShape, GameBoard *gameBoard) {
     }
 }
 
-
-void clearLines(GameBoard *gameBoard,GameSettings *gameSettings) {
+void clearLines(GameBoard *gameBoard) {
     for (int i = gameBoard->height - 1; i >= 0; i--) {
         int isLineFull = 1;
         for (int j = 0; j < gameBoard->width; j++) {
@@ -79,16 +79,24 @@ void clearLines(GameBoard *gameBoard,GameSettings *gameSettings) {
             }
         }
         if (isLineFull) {
-            for (int k = i; k > 0; k--) {
+
+            for (int j = 0; j < gameBoard->width; j++) {
+                setCell(gameBoard, j, i, 0);
+            }
+
+            // Shift cells above the cleared line down by one unit
+            for (int k = i; k < BOARD_HEIGHT-1; k++) {
                 for (int j = 0; j < gameBoard->width; j++) {
-                    setCell(gameBoard, j, k, getCell(gameBoard, j, k - 1));
+                    setCell(gameBoard, j, k, getCell(gameBoard, j, k + 1));
                 }
             }
+
+            // Set the top row to empty
             for (int j = 0; j < gameBoard->width; j++) {
-                setCell(gameBoard, j, 0, 0);
+                setCell(gameBoard, j, BOARD_HEIGHT-1, 0);
             }
-            i++;
-            gameSettings->score++;
+
+            gameBoard->score++;
         }
     }
 }

@@ -3,6 +3,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/main.dir/blocks.c.o.d"
   "CMakeFiles/main.dir/collisions.c.o"
   "CMakeFiles/main.dir/collisions.c.o.d"
+  "CMakeFiles/main.dir/input.c.o"
+  "CMakeFiles/main.dir/input.c.o.d"
   "CMakeFiles/main.dir/main.c.o"
   "CMakeFiles/main.dir/main.c.o.d"
   "CMakeFiles/main.dir/render.c.o"

@@ -3,25 +3,25 @@
 #include <stdlib.h>
 #include <time.h>
 #include "blocks.h"
+#include "render.h"
 #include "collisions.h"
 #include <SDL2/SDL_ttf.h>
-#include "render.h"
+#include "input.h"
 
+#define TOP_SCORES_FILE "topScores.txt"
+#define NUM_TOP_SCORES 10
 #define MS_PER_UPDATE 16
 #define TILE_SIZE 22
 #define BOARD_WIDTH 10
 #define BOARD_HEIGHT 20
-#define NUM_MENU_ITEMS 3
+#define NUM_MENU_ITEMS 4
+#define NUM_SETTINGS_FIELDS 3
+#define MAX_GAME_SPEED 40
 #define BOARD_SIZE (BOARD_HEIGHT * BOARD_WIDTH)
 
-typedef enum
-{
-    PLAY,
-    SETTINGS_MENU,
-    QUIT
-} MenuOption;
 
 int selectedMenuItem = 0;
+int selectedInput = 0;
 SHAPE activeShape;
 SHAPE nextShape;
 SDL_Renderer *renderer;
@@ -33,16 +33,24 @@ GameBoard gameBoard;
 TTF_Font *font;
 GameSettings gameSettings;
 
-
-GameBoard createGameBoard(int width, int height) {
+GameBoard createGameBoard(int width, int height)
+{
     GameBoard board;
     board.width = width;
     board.height = height;
     board.data = malloc(sizeof(int) * width * height);
+
+    if (board.data == NULL)
+    {
+        fprintf(stderr, "Failed to allocate memory for game board\n");
+        exit(1);
+    }
+
     return board;
 }
 
-void freeGameBoard(GameBoard *board) {
+void freeGameBoard(GameBoard *board)
+{
     free(board->data);
 }
 
@@ -52,21 +60,112 @@ SHAPE generateNewShape()
     return blocks[rand() % 7];
 }
 
-void rotate() {
-    SHAPE originalShape = activeShape;  
+void rotate()
+{
+    SHAPE originalShape = activeShape;
 
     int newSize = reverseCols(activeShape.matrix, activeShape.size);
     activeShape.size = newSize;
     transpose(activeShape.matrix, activeShape.size);
 
-    if (checkLeftCollision(activeShape)) {
+    if (checkLeftCollision(activeShape, &gameBoard))
+    {
         activeShape.x++;
-    } else if (checkRightCollision(activeShape, BOARD_WIDTH)) {
+    }
+    else if (checkRightCollision(activeShape, BOARD_WIDTH, &gameBoard))
+    {
         activeShape.x--;
     }
 
-    if (checkCollision(activeShape, &gameBoard)) {
-        activeShape = originalShape; 
+    if (checkCollision(activeShape, &gameBoard))
+    {
+        activeShape = originalShape;
+    }
+}
+
+void checkForEnd(GameBoard *gameBoard)
+{
+    int currentScore = gameBoard->score;
+    int topScores[NUM_TOP_SCORES];
+    int gameOver = 0;
+
+    FILE *file = fopen(TOP_SCORES_FILE, "a+");
+
+    if (file != NULL)
+    {
+        fseek(file, 0, SEEK_SET);
+        for (int i = 0; i < NUM_TOP_SCORES; i++)
+        {
+            if (fscanf(file, "%d", &topScores[i]) != 1)
+            {
+                topScores[i] = 0;
+            }
+        }
+
+        fclose(file);
+    }
+    else
+    {
+        perror("Error opening top scores file");
+        return;
+    }
+    for (int i = 0; i < gameBoard->width; i++)
+    {
+        if (getCell(gameBoard, i, BOARD_HEIGHT - 1) == 1)
+        {
+            gameOver = 1;
+        }
+        }
+
+    if (gameOver)
+    {
+        int isNewTopScore = 0;
+        for (int i = 0; i < NUM_TOP_SCORES; i++)
+        {
+            if (currentScore > topScores[i])
+            {
+                isNewTopScore = 1;
+                break;
+            }
+        }
+        if (isNewTopScore)
+        {
+            file = fopen(TOP_SCORES_FILE, "w");
+            if (file != NULL)
+            {
+                for (int i = 0; i < NUM_TOP_SCORES; i++)
+                {
+                    if (currentScore > topScores[i])
+                    {
+                        fprintf(file, "%d\n", currentScore);
+                        currentScore = topScores[i];
+                    }
+                    else
+                    {
+                        fprintf(file, "%d\n", topScores[i]);
+                    }
+                }
+
+                fclose(file);
+            }
+            else
+            {
+                perror("Error opening top scores file for writing");
+            }
+
+        }
+        gameBoard->lastScore = gameBoard->score;
+            gameBoard->score = 0;
+
+            for (int i = 0; i < BOARD_WIDTH; i++)
+            {
+                for (int j = 0; j < BOARD_HEIGHT; j++)
+                {
+                    setCell(gameBoard, i, j, 0);
+                }
+            }
+
+            gameState = MENU;
     }
 }
 
@@ -74,24 +173,30 @@ void lockShape()
 {
     srand(time(NULL));
     updateGameBoard(activeShape, &gameBoard);
-    clearLines(&gameBoard, &gameSettings);
+    clearLines(&gameBoard);
     activeShape = nextShape;
     nextShape = generateNewShape();
     nextShape.x = rand() % (10 - nextShape.size);
     activeShape.y = 0;
-    if (checkCollision(activeShape, &gameBoard))
-    {
-        exit(0);
-    }
+    checkForEnd(&gameBoard);
 }
 
 void update(int frameCount)
 {
-    if (frameCount % 20 == 0)
+    SHAPE testShape = activeShape;
+    testShape.y++;
+
+    if (frameCount % (MAX_GAME_SPEED - gameSettings.gameSpeed + 1) == 0)
     {
-        if (!checkCollision(activeShape, &gameBoard))
+        int collision = checkCollision(testShape, &gameBoard);
+        if (!collision)
         {
             activeShape.y++;
+        }
+        else if (collision == 2)
+        {
+            activeShape.y++;
+            lockShape();
         }
         else
         {
@@ -99,26 +204,25 @@ void update(int frameCount)
         }
     }
 
-    if (left && !checkLeftCollision(activeShape))
+    if (left && !checkLeftCollision(activeShape, &gameBoard))
     {
         activeShape.x--;
     }
-    if (right && !checkRightCollision(activeShape, BOARD_WIDTH))
+    if (right && !checkRightCollision(activeShape, BOARD_WIDTH, &gameBoard))
     {
         activeShape.x++;
     }
     if (down)
     {
-        if (!checkCollision(activeShape, &gameBoard))
+        int collision = checkCollision(testShape, &gameBoard);
+        if (!collision)
         {
-            if (activeShape.y + activeShape.size < TILE_SIZE * BOARD_HEIGHT)
-            {
-                activeShape.y++;
-            }
-            else
-            {
-                activeShape.y = 5;
-            }
+            activeShape.y++;
+        }
+        else if (collision == 2)
+        {
+            activeShape.y++;
+            lockShape();
         }
         else
         {
@@ -131,121 +235,29 @@ void update(int frameCount)
     }
 }
 
-void handleMenuInput()
-{
-    SDL_Event e;
-    while (SDL_PollEvent(&e))
-    {
-        if (e.type == SDL_QUIT)
-        {
-            gameState = QUIT_GAME;
-        }
-        else if (e.type == SDL_KEYDOWN)
-        {
-            switch (e.key.keysym.sym)
-            {
-            case SDLK_UP:
-                selectedMenuItem = (selectedMenuItem - 1 + NUM_MENU_ITEMS) % NUM_MENU_ITEMS;
-                break;
-            case SDLK_DOWN:
-                selectedMenuItem = (selectedMenuItem + 1) % NUM_MENU_ITEMS;
-                break;
-            case SDLK_RETURN:
-                switch (selectedMenuItem)
-                {
-                case PLAY:
-                    gameState = PLAYING;
-                    break;
-                case SETTINGS_MENU:
-                    gameState = SETTINGS;
-                    break;
-                case QUIT:
-                    gameState = QUIT_GAME;
-                    break;
-                }
-                break;
-            case SDLK_ESCAPE:
-                exit(0);
-                break;
-            }
-        }
-    }
-}
-
-void input()
-{
-    up = down = left = right = 0;
-    SDL_Event e;
-
-    switch (gameState)
-    {
-    case MENU:
-        handleMenuInput();
-        break;
-    case PLAYING:
-        while (SDL_PollEvent(&e))
-        {
-            if (e.type == SDL_QUIT)
-                exit(0);
-            switch (e.type)
-            {
-            case SDL_KEYUP:
-                switch (e.key.keysym.sym)
-                {
-                case SDLK_LEFT:
-                    left = 1;
-                    break;
-                case SDLK_RIGHT:
-                    right = 1;
-                    break;
-                case SDLK_UP:
-                    up = 1;
-                    break;
-                case SDLK_DOWN:
-                    down = 0;
-                    break;
-                case SDLK_ESCAPE:
-                    exit(0);
-                    break;
-                }
-            case SDL_KEYDOWN:
-                switch (e.key.keysym.sym)
-                {
-                case SDLK_DOWN:
-                    down = 1;
-                    break;
-                }
-            }
-        }
-        break;
-    case SETTINGS:
-        // Handle input for settings state if needed
-        break;
-    case QUIT_GAME:
-        break; // No input handling for QUIT state
-    }
-}
-
 int main()
 {
     activeShape = generateNewShape();
     activeShape.x = rand() % (10 - activeShape.size);
     nextShape = activeShape = generateNewShape();
     nextShape.x = rand() % (10 - nextShape.size);
-    gameSettings.gameSpeed = 150;
-    gameSettings.score = 0;
+    gameSettings.gameSpeed = 20;
+    strcpy(gameSettings.name, "Player");
     SDL_Rect rect;
     rect.w = rect.h = TILE_SIZE;
-    gameBoard = createGameBoard(BOARD_WIDTH, BOARD_HEIGHT); 
-
+    gameBoard = createGameBoard(BOARD_WIDTH, BOARD_HEIGHT);
+    gameBoard.score = 0;
+    gameBoard.lastScore = -1;
     left = right = up = down = 0;
     int frameCount = 0;
     lastFrame = 0;
     fps = 0;
 
-    for (int i = 0; i < BOARD_WIDTH; i++) {
-        for (int j = 0; j < BOARD_HEIGHT; j++) {
-            setCell(&gameBoard,i,j,0);
+    for (int i = 0; i < BOARD_WIDTH; i++)
+    {
+        for (int j = 0; j < BOARD_HEIGHT; j++)
+        {
+            setCell(&gameBoard, i, j, 0);
         }
     }
 
@@ -288,12 +300,14 @@ int main()
         {
             lastFrameTime = currentTime;
             frameCount++;
-            update(frameCount);
+            if (gameState == PLAYING)
+            {
+                update(frameCount);
+            }
             input();
-            render(renderer, window, activeShape,nextShape, &gameBoard, gameState, selectedMenuItem, font,gameSettings);
+            render(renderer, window, activeShape, nextShape, &gameBoard, gameState, selectedMenuItem, font, &gameSettings, selectedInput);
         }
     }
-
 
     freeGameBoard(&gameBoard);
     SDL_DestroyRenderer(renderer);

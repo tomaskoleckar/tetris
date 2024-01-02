@@ -177,6 +177,30 @@ collisions.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/collisions.c.s
 .PHONY : collisions.c.s
 
+input.o: input.c.o
+.PHONY : input.o
+
+# target to build an object file
+input.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/input.c.o
+.PHONY : input.c.o
+
+input.i: input.c.i
+.PHONY : input.i
+
+# target to preprocess a source file
+input.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/input.c.i
+.PHONY : input.c.i
+
+input.s: input.c.s
+.PHONY : input.s
+
+# target to generate assembly for a file
+input.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/input.c.s
+.PHONY : input.c.s
+
 main.o: main.c.o
 .PHONY : main.o
 
@@ -240,6 +264,9 @@ help:
 	@echo "... collisions.o"
 	@echo "... collisions.i"
 	@echo "... collisions.s"
+	@echo "... input.o"
+	@echo "... input.i"
+	@echo "... input.s"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"
